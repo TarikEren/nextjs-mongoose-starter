@@ -4,6 +4,10 @@ NOTE: This repository is meant to be used as boilerplate, not as a full fledged 
 Prerequisites:
     - Create a `.env` or `.env.local` file at the root of your project and add a `DB_URL` field that contains your
 connection string.
+    - Run ```bash
+    npm i
+    ```
+    to install the required packages.
 
 Run:
 ```bash
