@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NextJS Mongoose Starter
+NOTE: This repository is meant to be used as boilerplate, not as a full fledged app.
 
-## Getting Started
+Prerequisites:
+    - Create a `.env` or `.env.local` file at the root of your project and add a `DB_URL` field that contains your
+connection string.
 
-First, run the development server:
-
+Run:
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+to start
+
+## Models
+The codebase requires interfaces that extend the class `mongoose.Document` that will be used in the creation of the model
+and the generic base classes.
+
+Take for example, a to-do app, in which we need to define a to-do interface that extends `mongoose.Document`
+and a `mongoose.Schema` to create our model.
+
+We can create the interface and the model as such:
+
+```typescript
+    interface ITodoModel extends mongoose.Document {
+        // Fields
+    }
+
+    const todoSchema = new mongoose.Schema<ITodoModel>({
+        // Fields
+    })
+
+    const Todo = mongoose.models.Todo // In case the model already exists, use the existing one
+        || mongoose.Model<ITodoModel>("Todo", todoSchema); // Else, create a new one
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- The backend is comprised of repository and service layers, each containing a `base` class.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Repository Layer
+The codebase contains a generic `baseRepository` class that is to be extended by other, specific repositories.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Using our to-do app example, the `baseRepository` class would be extended as such to create a to-do repository:
 
-## Learn More
+```typescript
+    class todoRepository extends baseRepository<ITodoModel> // We created ITodoModel above, refer to section `Models`
+    {
+        // Additional operations in case it's necessary
+    }
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Service Layer
+The codebase also contains a generic `baseService` class that is to be extended by other, specific services.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Using the same example, the `baseService` class would be extended as such to create a to-do service:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```typescript
+    class todoService extends baseService<ITodoModel> // The interface created above
+    {
+        // Additional operations in case it's necessary
+    }
+```
 
-## Deploy on Vercel
+## Custom Errors
+The codebase contains custom error classes that extend the standard `Error` class. There are 2 main error types:
+`AppError` and `HTTPError`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`AppError` refers to errors that are raised in case of an internal error (Invalid configuration, couldn't connect to DB etc.)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`HTTPError` refers to errors that the client should see. The `HTTPError` class contains an extra `statusCode` field.
